@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกความดี</title>
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif; /* หรือฟอนต์ไทยอื่นๆ ที่ชอบ */
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #2a9d8f;
+            text-align: center;
+        }
+        nav {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        nav button {
+            background-color: #264653;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        nav button:hover {
+            background-color: #2a9d8f;
+        }
+        nav button.active {
+            background-color: #e76f51;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #e9c46a;
+            color: #264653;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .actions button {
+            margin-right: 5px;
+            padding: 5px 8px;
+            border-radius: 3px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-edit { background-color: #f4a261; color: white; }
+        .btn-delete { background-color: #e76f51; color: white; }
+        .btn-add-point { background-color: #2a9d8f; color: white; }
+        .star-icon { color: gold; cursor: pointer; font-size: 1.2em; } /* สำหรับปุ่มดาว (ถ้าต้องการ) */
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        form input, form button {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        form button {
+            background-color: #264653;
+            color: white;
+            cursor: pointer;
+        }
+        form button:hover {
+            background-color: #2a9d8f;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ระบบบันทึกความดีของน้องๆ</h1>
+
+    <nav>
+        <button id="navStudentMgmt" class="active">จัดการข้อมูลนักเรียน</button>
+        <button id="navDashboard">แดชบอร์ดคะแนน</button>
+    </nav>
+
+    <!-- ส่วนจัดการข้อมูลนักเรียน -->
+    <div id="studentManagementSection" class="container">
+        <h2>จัดการข้อมูลนักเรียน</h2>
+        <form id="studentForm">
+            <input type="hidden" id="studentId">
+            <input type="text" id="studentName" placeholder="ชื่อ-สกุลนักเรียน" required>
+            <input type="text" id="studentClass" placeholder="ชั้นเรียน (เช่น ป.1/1)" required>
+            <button type="submit" id="submitStudentForm">เพิ่มนักเรียน</button>
+        </form>
+
+        <h3>รายชื่อนักเรียน</h3>
+        <table id="studentListTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ชื่อ-สกุล</th>
+                    <th>ชั้นเรียน</th>
+                    <th>คะแนนความดี</th>
+                    <th>การกระทำ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- ข้อมูลนักเรียนจะถูกเพิ่มที่นี่ -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ส่วนแดชบอร์ด -->
+    <div id="dashboardSection" class="container hidden">
+        <h2>แดชบอร์ดรายงานคะแนน</h2>
+        <table id="dashboardTable">
+            <thead>
+                <tr>
+                    <th>อันดับ</th>
+                    <th>ชื่อ-สกุล</th>
+                    <th>ชั้นเรียน</th>
+                    <th>คะแนนความดีสะสม</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- ข้อมูลคะแนนนักเรียนจะถูกเพิ่มที่นี่ -->
+            </tbody>
+        </table>
+    </div>
+
+<script>
+    const studentForm = document.getElementById('studentForm');
+    const studentIdInput = document.getElementById('studentId');
+    const studentNameInput = document.getElementById('studentName');
+    const studentClassInput = document.getElementById('studentClass');
+    const submitStudentFormButton = document.getElementById('submitStudentForm');
+    const studentListTableBody = document.querySelector('#studentListTable tbody');
+    const dashboardTableBody = document.querySelector('#dashboardTable tbody');
+
+    const navStudentMgmtBtn = document.getElementById('navStudentMgmt');
+    const navDashboardBtn = document.getElementById('navDashboard');
+    const studentManagementSection = document.getElementById('studentManagementSection');
+    const dashboardSection = document.getElementById('dashboardSection');
+
+    const STORAGE_KEY = 'goodDeedsStudents';
+
+    let students = [];
+    let editingStudentId = null;
+
+    // --- ส่วนจำลองข้อมูลนักเรียน 5 คน ---
+    function getInitialStudents() {
+        return [
+            { id: Date.now() + 1, name: 'สมหญิง เรียนดี', class: 'ป.1/1', points: 0 },
+            { id: Date.now() + 2, name: 'สมชาย มีน้ำใจ', class: 'ป.1/2', points: 0 },
+            { id: Date.now() + 3, name: 'มานี รักเพื่อน', class: 'ป.2/1', points: 0 },
+            { id: Date.now() + 4, name: 'ปิติ ขยันหมั่นเพียร', class: 'ป.2/1', points: 0 },
+            { id: Date.now() + 5, name: 'ชูใจ ใฝ่รู้', class: 'ป.3/1', points: 0 }
+        ];
+    }
+
+    // --- การจัดการข้อมูลใน localStorage ---
+    function loadStudentsFromStorage() {
+        const storedStudents = localStorage.getItem(STORAGE_KEY);
+        if (storedStudents) {
+            students = JSON.parse(storedStudents);
+        } else {
+            // ถ้าไม่มีข้อมูล ให้ใช้ข้อมูลจำลอง
+            students = getInitialStudents();
+            saveStudentsToStorage();
+        }
+    }
+
+    function saveStudentsToStorage() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
+    }
+
+    // --- การแสดงผล ---
+    function renderStudentList() {
+        studentListTableBody.innerHTML = ''; // เคลียร์ตารางเก่า
+        if (students.length === 0) {
+            studentListTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">ยังไม่มีข้อมูลนักเรียน</td></tr>';
+            return;
+        }
+        students.forEach(student => {
+            const row = studentListTableBody.insertRow();
+            row.innerHTML = `
+                <td>${student.id}</td>
+                <td>${student.name}</td>
+                <td>${student.class}</td>
+                <td>${student.points}</td>
+                <td class="actions">
+                    <button class="btn-add-point" onclick="addPointToStudent(${student.id})">ให้คะแนน (+1)</button>
+                    <button class="btn-edit" onclick="editStudentHandler(${student.id})">แก้ไข</button>
+                    <button class="btn-delete" onclick="deleteStudent(${student.id})">ลบ</button>
+                </td>
+            `;
+        });
+    }
+
+    function renderDashboard() {
+        dashboardTableBody.innerHTML = ''; // เคลียร์ตารางเก่า
+        if (students.length === 0) {
+            dashboardTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">ยังไม่มีข้อมูลนักเรียน</td></tr>';
+            return;
+        }
+
+        // เรียงลำดับนักเรียนตามคะแนนจากมากไปน้อย
+        const sortedStudents = [...students].sort((a, b) => b.points - a.points);
+
+        sortedStudents.forEach((student, index) => {
+            const row = dashboardTableBody.insertRow();
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${student.name}</td>
+                <td>${student.class}</td>
+                <td>${student.points}</td>
+            `;
+        });
+    }
+
+    function resetForm() {
+        studentForm.reset();
+        studentIdInput.value = '';
+        editingStudentId = null;
+        submitStudentFormButton.textContent = 'เพิ่มนักเรียน';
+    }
+
+    // --- CRUD Operations ---
+    function addStudent(name, studentClass) {
+        const newStudent = {
+            id: Date.now(), // ใช้ timestamp เป็น ID แบบง่าย
+            name: name,
+            class: studentClass,
+            points: 0
+        };
+        students.push(newStudent);
+        saveStudentsToStorage();
+        renderStudentList();
+        renderDashboard(); // อัปเดตแดชบอร์ดด้วย
+        resetForm();
+    }
+
+    function updateStudent(id, name, studentClass) {
+        const studentIndex = students.findIndex(s => s.id === id);
+        if (studentIndex > -1) {
+            students[studentIndex].name = name;
+            students[studentIndex].class = studentClass;
+            // points ไม่ได้แก้ในฟังก์ชันนี้
+            saveStudentsToStorage();
+            renderStudentList();
+            renderDashboard();
+            resetForm();
+        }
+    }
+
+    window.deleteStudent = function(id) { // ทำให้เรียกจาก HTML onclick ได้
+        if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนักเรียนคนนี้?')) {
+            students = students.filter(s => s.id !== id);
+            saveStudentsToStorage();
+            renderStudentList();
+            renderDashboard();
+            if (editingStudentId === id) { // ถ้ากำลังแก้ไขคนที่ถูกลบ ให้รีเซ็ตฟอร์ม
+                resetForm();
+            }
+        }
+    }
+
+    window.editStudentHandler = function(id) { // ทำให้เรียกจาก HTML onclick ได้
+        const student = students.find(s => s.id === id);
+        if (student) {
+            studentIdInput.value = student.id;
+            studentNameInput.value = student.name;
+            studentClassInput.value = student.class;
+            editingStudentId = student.id;
+            submitStudentFormButton.textContent = 'บันทึกการแก้ไข';
+            // เลื่อนหน้าจอไปที่ฟอร์ม (ถ้าจำเป็น)
+            studentForm.scrollIntoView({ behavior: 'smooth' });
+            switchToStudentManagementView(); // สลับไปหน้าจัดการถ้านอยู่หน้าอื่น
+        }
+    }
+
+    // --- การให้คะแนน ---
+    window.addPointToStudent = function(id) { // ทำให้เรียกจาก HTML onclick ได้
+        const studentIndex = students.findIndex(s => s.id === id);
+        if (studentIndex > -1) {
+            students[studentIndex].points += 1; // เพิ่มทีละ 1 คะแนน
+            saveStudentsToStorage();
+            renderStudentList();
+            renderDashboard();
+        }
+    }
+
+    // --- การสลับหน้า View ---
+    function switchToStudentManagementView() {
+        studentManagementSection.classList.remove('hidden');
+        dashboardSection.classList.add('hidden');
+        navStudentMgmtBtn.classList.add('active');
+        navDashboardBtn.classList.remove('active');
+    }
+
+    function switchToDashboardView() {
+        studentManagementSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+        navStudentMgmtBtn.classList.remove('active');
+        navDashboardBtn.classList.add('active');
+        renderDashboard(); // โหลดข้อมูลใหม่ทุกครั้งที่เปิดแดชบอร์ด
+    }
+
+    // --- Event Listeners ---
+    studentForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const name = studentNameInput.value.trim();
+        const studentClass = studentClassInput.value.trim();
+
+        if (name === '' || studentClass === '') {
+            alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+            return;
+        }
+
+        if (editingStudentId) {
+            updateStudent(editingStudentId, name, studentClass);
+        } else {
+            addStudent(name, studentClass);
+        }
+    });
+
+    navStudentMgmtBtn.addEventListener('click', switchToStudentManagementView);
+    navDashboardBtn.addEventListener('click', switchToDashboardView);
+
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', () => {
+        loadStudentsFromStorage();
+        renderStudentList();
+        // renderDashboard(); // Dashboard จะ render เมื่อถูกคลิก
+        switchToStudentManagementView(); // เริ่มต้นที่หน้าจัดการนักเรียน
+    });
+
+</script>
+
+</body>
+</html>
