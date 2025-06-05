@@ -1,368 +1,525 @@
+
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบบันทึกความดี</title>
+    <title>บันทึกความดี | จดความดีของคุณทุกวัน</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Sarabun', sans-serif; /* หรือฟอนต์ไทยอื่นๆ ที่ชอบ */
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f7f6;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            font-family: 'Prompt', sans-serif;
+            background-color: #f0f9ff;
+            background-image: radial-gradient(#fcd34d 0.5px, transparent 0.5px), radial-gradient(#fcd34d 0.5px, #f0f9ff 0.5px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
         }
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            width: 90%;
-            max-width: 800px;
-            margin-bottom: 20px;
-        }
-        h1, h2 {
-            color: #2a9d8f;
-            text-align: center;
-        }
-        nav {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        nav button {
-            background-color: #264653;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            margin: 0 5px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-        nav button:hover {
-            background-color: #2a9d8f;
-        }
-        nav button.active {
-            background-color: #e76f51;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #e9c46a;
-            color: #264653;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        .actions button {
-            margin-right: 5px;
-            padding: 5px 8px;
-            border-radius: 3px;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-edit { background-color: #f4a261; color: white; }
-        .btn-delete { background-color: #e76f51; color: white; }
-        .btn-add-point { background-color: #2a9d8f; color: white; }
-        .star-icon { color: gold; cursor: pointer; font-size: 1.2em; } /* สำหรับปุ่มดาว (ถ้าต้องการ) */
 
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
+        .good-deed-card {
+            transition: all 0.3s ease;
         }
-        form input, form button {
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+        
+        .good-deed-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
-        form button {
-            background-color: #264653;
+
+        .btn-primary {
+            background-color: #3b82f6;
             color: white;
-            cursor: pointer;
+            transition: all 0.2s ease;
         }
-        form button:hover {
-            background-color: #2a9d8f;
+        
+        .btn-primary:hover {
+            background-color: #2563eb;
+            transform: scale(1.05);
         }
-        .hidden {
-            display: none;
+
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-success:hover {
+            background-color: #059669;
+            transform: scale(1.05);
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-danger:hover {
+            background-color: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .btn-warning {
+            background-color: #f59e0b;
+            color: white;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-warning:hover {
+            background-color: #d97706;
+            transform: scale(1.05);
+        }
+
+        .modal {
+            transition: all 0.3s ease;
+        }
+
+        .modal-content {
+            transition: all 0.3s ease;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f59e0b;
+            border-radius: 50%;
+            animation: confetti 1s ease-out forwards;
+        }
+
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100px) rotate(720deg); opacity: 0; }
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <div class="flex justify-center items-center mb-4">
+                <div class="bg-yellow-400 rounded-full p-3 mr-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                </div>
+                <h1 class="text-4xl font-bold text-blue-600">บันทึกความดี</h1>
+            </div>
+            <p class="text-gray-600 text-lg">จดบันทึกความดีที่คุณทำในแต่ละวัน เพื่อสร้างแรงบันดาลใจให้ตัวเองและผู้อื่น</p>
+        </header>
 
-    <h1>ระบบบันทึกความดีของน้องๆ</h1>
+        <!-- Main Content -->
+        <main>
+            <!-- Add New Deed Button -->
+            <div class="flex justify-center mb-8">
+                <button id="addDeedBtn" class="btn-primary px-6 py-3 rounded-full font-medium flex items-center shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    เพิ่มความดีใหม่
+                </button>
+            </div>
 
-    <nav>
-        <button id="navStudentMgmt" class="active">จัดการข้อมูลนักเรียน</button>
-        <button id="navDashboard">แดชบอร์ดคะแนน</button>
-    </nav>
+            <!-- Filter and Search -->
+            <div class="bg-white rounded-lg shadow-md p-4 mb-8">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="w-full md:w-1/2">
+                        <label for="search" class="block text-sm font-medium text-gray-700 mb-1">ค้นหา</label>
+                        <input type="text" id="search" placeholder="พิมพ์คำที่ต้องการค้นหา..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                    <div class="w-full md:w-1/2">
+                        <label for="filter" class="block text-sm font-medium text-gray-700 mb-1">กรองตามประเภท</label>
+                        <select id="filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            <option value="all">ทั้งหมด</option>
+                            <option value="personal">ส่วนตัว</option>
+                            <option value="family">ครอบครัว</option>
+                            <option value="society">สังคม</option>
+                            <option value="environment">สิ่งแวดล้อม</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
 
-    <!-- ส่วนจัดการข้อมูลนักเรียน -->
-    <div id="studentManagementSection" class="container">
-        <h2>จัดการข้อมูลนักเรียน</h2>
-        <form id="studentForm">
-            <input type="hidden" id="studentId">
-            <input type="text" id="studentName" placeholder="ชื่อ-สกุลนักเรียน" required>
-            <input type="text" id="studentClass" placeholder="ชั้นเรียน (เช่น ป.1/1)" required>
-            <button type="submit" id="submitStudentForm">เพิ่มนักเรียน</button>
-        </form>
+            <!-- Deeds List -->
+            <div id="deedsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Deed cards will be dynamically inserted here -->
+            </div>
 
-        <h3>รายชื่อนักเรียน</h3>
-        <table id="studentListTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>ชื่อ-สกุล</th>
-                    <th>ชั้นเรียน</th>
-                    <th>คะแนนความดี</th>
-                    <th>การกระทำ</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- ข้อมูลนักเรียนจะถูกเพิ่มที่นี่ -->
-            </tbody>
-        </table>
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden text-center py-16">
+                <div class="bg-yellow-100 rounded-full h-24 w-24 flex items-center justify-center mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-medium text-gray-700 mb-2">ยังไม่มีบันทึกความดี</h3>
+                <p class="text-gray-500 mb-6">เริ่มบันทึกความดีแรกของคุณวันนี้เลย!</p>
+                <button id="emptyStateAddBtn" class="btn-primary px-6 py-3 rounded-full font-medium inline-flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    เพิ่มความดีใหม่
+                </button>
+            </div>
+        </main>
+
+        <!-- Add/Edit Deed Modal -->
+        <div id="deedModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6 transform transition-all">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="modalTitle" class="text-2xl font-bold text-gray-800">เพิ่มความดีใหม่</h2>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-700 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <form id="deedForm">
+                    <input type="hidden" id="deedId">
+                    <div class="mb-4">
+                        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">หัวข้อความดี</label>
+                        <input type="text" id="title" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                    <div class="mb-4">
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">รายละเอียด</label>
+                        <textarea id="description" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="date" class="block text-sm font-medium text-gray-700 mb-1">วันที่ทำความดี</label>
+                        <input type="date" id="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                    <div class="mb-6">
+                        <label for="category" class="block text-sm font-medium text-gray-700 mb-1">ประเภทความดี</label>
+                        <select id="category" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            <option value="personal">ส่วนตัว</option>
+                            <option value="family">ครอบครัว</option>
+                            <option value="society">สังคม</option>
+                            <option value="environment">สิ่งแวดล้อม</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancelBtn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">ยกเลิก</button>
+                        <button type="submit" id="saveBtn" class="btn-success px-4 py-2 rounded-lg">บันทึก</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6 transform transition-all">
+                <div class="text-center mb-6">
+                    <div class="bg-red-100 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">ยืนยันการลบ</h2>
+                    <p class="text-gray-600">คุณแน่ใจหรือไม่ว่าต้องการลบบันทึกความดีนี้? การกระทำนี้ไม่สามารถย้อนกลับได้</p>
+                </div>
+                <div class="flex justify-center space-x-4">
+                    <button id="cancelDeleteBtn" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">ยกเลิก</button>
+                    <button id="confirmDeleteBtn" class="btn-danger px-6 py-2 rounded-lg">ลบ</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Toast Notification -->
+        <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-500 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            <span id="toastMessage">บันทึกความดีสำเร็จ!</span>
+        </div>
     </div>
 
-    <!-- ส่วนแดชบอร์ด -->
-    <div id="dashboardSection" class="container hidden">
-        <h2>แดชบอร์ดรายงานคะแนน</h2>
-        <table id="dashboardTable">
-            <thead>
-                <tr>
-                    <th>อันดับ</th>
-                    <th>ชื่อ-สกุล</th>
-                    <th>ชั้นเรียน</th>
-                    <th>คะแนนความดีสะสม</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- ข้อมูลคะแนนนักเรียนจะถูกเพิ่มที่นี่ -->
-            </tbody>
-        </table>
-    </div>
-
-<script>
-    const studentForm = document.getElementById('studentForm');
-    const studentIdInput = document.getElementById('studentId');
-    const studentNameInput = document.getElementById('studentName');
-    const studentClassInput = document.getElementById('studentClass');
-    const submitStudentFormButton = document.getElementById('submitStudentForm');
-    const studentListTableBody = document.querySelector('#studentListTable tbody');
-    const dashboardTableBody = document.querySelector('#dashboardTable tbody');
-
-    const navStudentMgmtBtn = document.getElementById('navStudentMgmt');
-    const navDashboardBtn = document.getElementById('navDashboard');
-    const studentManagementSection = document.getElementById('studentManagementSection');
-    const dashboardSection = document.getElementById('dashboardSection');
-
-    const STORAGE_KEY = 'goodDeedsStudents';
-
-    let students = [];
-    let editingStudentId = null;
-
-    // --- ส่วนจำลองข้อมูลนักเรียน 5 คน ---
-    function getInitialStudents() {
-        return [
-            { id: Date.now() + 1, name: 'สมหญิง เรียนดี', class: 'ป.1/1', points: 0 },
-            { id: Date.now() + 2, name: 'สมชาย มีน้ำใจ', class: 'ป.1/2', points: 0 },
-            { id: Date.now() + 3, name: 'มานี รักเพื่อน', class: 'ป.2/1', points: 0 },
-            { id: Date.now() + 4, name: 'ปิติ ขยันหมั่นเพียร', class: 'ป.2/1', points: 0 },
-            { id: Date.now() + 5, name: 'ชูใจ ใฝ่รู้', class: 'ป.3/1', points: 0 }
-        ];
-    }
-
-    // --- การจัดการข้อมูลใน localStorage ---
-    function loadStudentsFromStorage() {
-        const storedStudents = localStorage.getItem(STORAGE_KEY);
-        if (storedStudents) {
-            students = JSON.parse(storedStudents);
-        } else {
-            // ถ้าไม่มีข้อมูล ให้ใช้ข้อมูลจำลอง
-            students = getInitialStudents();
-            saveStudentsToStorage();
-        }
-    }
-
-    function saveStudentsToStorage() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
-    }
-
-    // --- การแสดงผล ---
-    function renderStudentList() {
-        studentListTableBody.innerHTML = ''; // เคลียร์ตารางเก่า
-        if (students.length === 0) {
-            studentListTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">ยังไม่มีข้อมูลนักเรียน</td></tr>';
-            return;
-        }
-        students.forEach(student => {
-            const row = studentListTableBody.insertRow();
-            row.innerHTML = `
-                <td>${student.id}</td>
-                <td>${student.name}</td>
-                <td>${student.class}</td>
-                <td>${student.points}</td>
-                <td class="actions">
-                    <button class="btn-add-point" onclick="addPointToStudent(${student.id})">ให้คะแนน (+1)</button>
-                    <button class="btn-edit" onclick="editStudentHandler(${student.id})">แก้ไข</button>
-                    <button class="btn-delete" onclick="deleteStudent(${student.id})">ลบ</button>
-                </td>
-            `;
-        });
-    }
-
-    function renderDashboard() {
-        dashboardTableBody.innerHTML = ''; // เคลียร์ตารางเก่า
-        if (students.length === 0) {
-            dashboardTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">ยังไม่มีข้อมูลนักเรียน</td></tr>';
-            return;
-        }
-
-        // เรียงลำดับนักเรียนตามคะแนนจากมากไปน้อย
-        const sortedStudents = [...students].sort((a, b) => b.points - a.points);
-
-        sortedStudents.forEach((student, index) => {
-            const row = dashboardTableBody.insertRow();
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${student.name}</td>
-                <td>${student.class}</td>
-                <td>${student.points}</td>
-            `;
-        });
-    }
-
-    function resetForm() {
-        studentForm.reset();
-        studentIdInput.value = '';
-        editingStudentId = null;
-        submitStudentFormButton.textContent = 'เพิ่มนักเรียน';
-    }
-
-    // --- CRUD Operations ---
-    function addStudent(name, studentClass) {
-        const newStudent = {
-            id: Date.now(), // ใช้ timestamp เป็น ID แบบง่าย
-            name: name,
-            class: studentClass,
-            points: 0
-        };
-        students.push(newStudent);
-        saveStudentsToStorage();
-        renderStudentList();
-        renderDashboard(); // อัปเดตแดชบอร์ดด้วย
-        resetForm();
-    }
-
-    function updateStudent(id, name, studentClass) {
-        const studentIndex = students.findIndex(s => s.id === id);
-        if (studentIndex > -1) {
-            students[studentIndex].name = name;
-            students[studentIndex].class = studentClass;
-            // points ไม่ได้แก้ในฟังก์ชันนี้
-            saveStudentsToStorage();
-            renderStudentList();
-            renderDashboard();
-            resetForm();
-        }
-    }
-
-    window.deleteStudent = function(id) { // ทำให้เรียกจาก HTML onclick ได้
-        if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนักเรียนคนนี้?')) {
-            students = students.filter(s => s.id !== id);
-            saveStudentsToStorage();
-            renderStudentList();
-            renderDashboard();
-            if (editingStudentId === id) { // ถ้ากำลังแก้ไขคนที่ถูกลบ ให้รีเซ็ตฟอร์ม
-                resetForm();
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const deedsList = document.getElementById('deedsList');
+            const emptyState = document.getElementById('emptyState');
+            const deedModal = document.getElementById('deedModal');
+            const deleteModal = document.getElementById('deleteModal');
+            const deedForm = document.getElementById('deedForm');
+            const modalTitle = document.getElementById('modalTitle');
+            const toast = document.getElementById('toast');
+            
+            // Form Elements
+            const deedIdInput = document.getElementById('deedId');
+            const titleInput = document.getElementById('title');
+            const descriptionInput = document.getElementById('description');
+            const dateInput = document.getElementById('date');
+            const categoryInput = document.getElementById('category');
+            const searchInput = document.getElementById('search');
+            const filterSelect = document.getElementById('filter');
+            
+            // Buttons
+            const addDeedBtn = document.getElementById('addDeedBtn');
+            const emptyStateAddBtn = document.getElementById('emptyStateAddBtn');
+            const closeModalBtn = document.getElementById('closeModal');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            
+            // Set today's date as default
+            const today = new Date();
+            const formattedDate = today.toISOString().substr(0, 10);
+            dateInput.value = formattedDate;
+            
+            // Sample data
+            let deeds = JSON.parse(localStorage.getItem('deeds')) || [
+                {
+                    id: 1,
+                    title: 'ช่วยเหลือคุณยายข้ามถนน',
+                    description: 'วันนี้ได้ช่วยคุณยายข้ามถนนที่สี่แยกใกล้บ้าน คุณยายดีใจมากและขอบคุณหลายครั้ง',
+                    date: '2023-06-15',
+                    category: 'society'
+                },
+                {
+                    id: 2,
+                    title: 'เก็บขยะที่สวนสาธารณะ',
+                    description: 'ไปวิ่งที่สวนสาธารณะและเห็นขยะหลายชิ้น เลยหยิบถุงมาเก็บขยะไปทิ้งที่ถังขยะ',
+                    date: '2023-06-10',
+                    category: 'environment'
+                },
+                {
+                    id: 3,
+                    title: 'ช่วยแม่ทำงานบ้าน',
+                    description: 'วันนี้ตื่นเช้ามาช่วยแม่ทำความสะอาดบ้านและล้างจาน',
+                    date: '2023-06-05',
+                    category: 'family'
+                }
+            ];
+            
+            // Initialize
+            renderDeeds();
+            
+            // Event Listeners
+            addDeedBtn.addEventListener('click', openAddModal);
+            emptyStateAddBtn.addEventListener('click', openAddModal);
+            closeModalBtn.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+            deedForm.addEventListener('submit', saveDeed);
+            cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+            confirmDeleteBtn.addEventListener('click', deleteDeed);
+            searchInput.addEventListener('input', filterDeeds);
+            filterSelect.addEventListener('change', filterDeeds);
+            
+            // Functions
+            function renderDeeds() {
+                const filteredDeeds = getFilteredDeeds();
+                deedsList.innerHTML = '';
+                
+                if (filteredDeeds.length === 0) {
+                    emptyState.classList.remove('hidden');
+                } else {
+                    emptyState.classList.add('hidden');
+                    
+                    filteredDeeds.forEach(deed => {
+                        const card = createDeedCard(deed);
+                        deedsList.appendChild(card);
+                    });
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('deeds', JSON.stringify(deeds));
             }
-        }
-    }
-
-    window.editStudentHandler = function(id) { // ทำให้เรียกจาก HTML onclick ได้
-        const student = students.find(s => s.id === id);
-        if (student) {
-            studentIdInput.value = student.id;
-            studentNameInput.value = student.name;
-            studentClassInput.value = student.class;
-            editingStudentId = student.id;
-            submitStudentFormButton.textContent = 'บันทึกการแก้ไข';
-            // เลื่อนหน้าจอไปที่ฟอร์ม (ถ้าจำเป็น)
-            studentForm.scrollIntoView({ behavior: 'smooth' });
-            switchToStudentManagementView(); // สลับไปหน้าจัดการถ้านอยู่หน้าอื่น
-        }
-    }
-
-    // --- การให้คะแนน ---
-    window.addPointToStudent = function(id) { // ทำให้เรียกจาก HTML onclick ได้
-        const studentIndex = students.findIndex(s => s.id === id);
-        if (studentIndex > -1) {
-            students[studentIndex].points += 1; // เพิ่มทีละ 1 คะแนน
-            saveStudentsToStorage();
-            renderStudentList();
-            renderDashboard();
-        }
-    }
-
-    // --- การสลับหน้า View ---
-    function switchToStudentManagementView() {
-        studentManagementSection.classList.remove('hidden');
-        dashboardSection.classList.add('hidden');
-        navStudentMgmtBtn.classList.add('active');
-        navDashboardBtn.classList.remove('active');
-    }
-
-    function switchToDashboardView() {
-        studentManagementSection.classList.add('hidden');
-        dashboardSection.classList.remove('hidden');
-        navStudentMgmtBtn.classList.remove('active');
-        navDashboardBtn.classList.add('active');
-        renderDashboard(); // โหลดข้อมูลใหม่ทุกครั้งที่เปิดแดชบอร์ด
-    }
-
-    // --- Event Listeners ---
-    studentForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const name = studentNameInput.value.trim();
-        const studentClass = studentClassInput.value.trim();
-
-        if (name === '' || studentClass === '') {
-            alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-            return;
-        }
-
-        if (editingStudentId) {
-            updateStudent(editingStudentId, name, studentClass);
-        } else {
-            addStudent(name, studentClass);
-        }
-    });
-
-    navStudentMgmtBtn.addEventListener('click', switchToStudentManagementView);
-    navDashboardBtn.addEventListener('click', switchToDashboardView);
-
-    // --- Initialization ---
-    document.addEventListener('DOMContentLoaded', () => {
-        loadStudentsFromStorage();
-        renderStudentList();
-        // renderDashboard(); // Dashboard จะ render เมื่อถูกคลิก
-        switchToStudentManagementView(); // เริ่มต้นที่หน้าจัดการนักเรียน
-    });
-
-</script>
-
-</body>
+            
+            function getFilteredDeeds() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filterValue = filterSelect.value;
+                
+                return deeds.filter(deed => {
+                    const matchesSearch = deed.title.toLowerCase().includes(searchTerm) || 
+                                         deed.description.toLowerCase().includes(searchTerm);
+                    const matchesFilter = filterValue === 'all' || deed.category === filterValue;
+                    
+                    return matchesSearch && matchesFilter;
+                }).sort((a, b) => new Date(b.date) - new Date(a.date));
+            }
+            
+            function createDeedCard(deed) {
+                const card = document.createElement('div');
+                card.className = 'good-deed-card bg-white rounded-xl shadow-md overflow-hidden fade-in';
+                
+                // Category badge color
+                let categoryColor, categoryText;
+                switch(deed.category) {
+                    case 'personal':
+                        categoryColor = 'bg-purple-100 text-purple-800';
+                        categoryText = 'ส่วนตัว';
+                        break;
+                    case 'family':
+                        categoryColor = 'bg-blue-100 text-blue-800';
+                        categoryText = 'ครอบครัว';
+                        break;
+                    case 'society':
+                        categoryColor = 'bg-yellow-100 text-yellow-800';
+                        categoryText = 'สังคม';
+                        break;
+                    case 'environment':
+                        categoryColor = 'bg-green-100 text-green-800';
+                        categoryText = 'สิ่งแวดล้อม';
+                        break;
+                }
+                
+                // Format date
+                const formattedDate = new Date(deed.date).toLocaleDateString('th-TH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                card.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="inline-block ${categoryColor} px-3 py-1 text-sm font-medium rounded-full">${categoryText}</span>
+                            <span class="text-sm text-gray-500">${formattedDate}</span>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">${deed.title}</h3>
+                        <p class="text-gray-600 mb-6">${deed.description || 'ไม่มีรายละเอียดเพิ่มเติม'}</p>
+                        <div class="flex justify-end space-x-2">
+                            <button class="edit-btn btn-warning px-3 py-1 rounded-lg text-sm" data-id="${deed.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
+                            <button class="delete-btn btn-danger px-3 py-1 rounded-lg text-sm" data-id="${deed.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Add event listeners to buttons
+                card.querySelector('.edit-btn').addEventListener('click', function() {
+                    openEditModal(deed.id);
+                });
+                
+                card.querySelector('.delete-btn').addEventListener('click', function() {
+                    openDeleteModal(deed.id);
+                });
+                
+                return card;
+            }
+            
+            function openAddModal() {
+                modalTitle.textContent = 'เพิ่มความดีใหม่';
+                deedIdInput.value = '';
+                deedForm.reset();
+                dateInput.value = formattedDate;
+                deedModal.classList.remove('hidden');
+            }
+            
+            function openEditModal(id) {
+                const deed = deeds.find(d => d.id === id);
+                if (deed) {
+                    modalTitle.textContent = 'แก้ไขความดี';
+                    deedIdInput.value = deed.id;
+                    titleInput.value = deed.title;
+                    descriptionInput.value = deed.description || '';
+                    dateInput.value = deed.date;
+                    categoryInput.value = deed.category;
+                    deedModal.classList.remove('hidden');
+                }
+            }
+            
+            function closeModal() {
+                deedModal.classList.add('hidden');
+            }
+            
+            function openDeleteModal(id) {
+                deedIdInput.value = id;
+                deleteModal.classList.remove('hidden');
+            }
+            
+            function closeDeleteModal() {
+                deleteModal.classList.add('hidden');
+            }
+            
+            function saveDeed(e) {
+                e.preventDefault();
+                
+                const id = deedIdInput.value ? parseInt(deedIdInput.value) : Date.now();
+                const title = titleInput.value;
+                const description = descriptionInput.value;
+                const date = dateInput.value;
+                const category = categoryInput.value;
+                
+                if (deedIdInput.value) {
+                    // Update existing deed
+                    const index = deeds.findIndex(d => d.id === parseInt(deedIdInput.value));
+                    if (index !== -1) {
+                        deeds[index] = { id: parseInt(id), title, description, date, category };
+                        showToast('บันทึกการแก้ไขสำเร็จ!');
+                    }
+                } else {
+                    // Add new deed
+                    deeds.push({ id, title, description, date, category });
+                    showToast('เพิ่มความดีใหม่สำเร็จ!');
+                    createConfetti();
+                }
+                
+                closeModal();
+                renderDeeds();
+            }
+            
+            function deleteDeed() {
+                const id = parseInt(deedIdInput.value);
+                deeds = deeds.filter(d => d.id !== id);
+                closeDeleteModal();
+                renderDeeds();
+                showToast('ลบความดีสำเร็จ');
+            }
+            
+            function filterDeeds() {
+                renderDeeds();
+            }
+            
+            function showToast(message) {
+                const toastMessage = document.getElementById('toastMessage');
+                toastMessage.textContent = message;
+                
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+                
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
+            }
+            
+            function createConfetti() {
+                const colors = ['#FCD34D', '#34D399', '#60A5FA', '#F87171', '#A78BFA'];
+                
+                for (let i = 0; i < 30; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.left = `${Math.random() * 100}%`;
+                    confetti.style.top = `${Math.random() * 20}%`;
+                    confetti.style.animationDuration = `${Math.random() * 2 + 1}s`;
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94ac5a75e307d33d',t:'MTc0OTA5MTczMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
