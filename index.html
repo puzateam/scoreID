@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบบันทึกความดี (Google Sheet)</title>
-    <!-- ไม่ต้องใช้ SheetJS library แล้ว ถ้าไม่ได้ import จาก excel โดยตรงอีก -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap');
 
@@ -85,7 +84,6 @@
 
     <div id="loading" class="loading-indicator hidden">กำลังโหลดข้อมูล...</div>
 
-    <!-- ส่วนจัดการข้อมูลนักเรียน -->
     <div id="studentManagementSection" class="container">
         <h2>จัดการข้อมูลนักเรียน</h2>
         <form id="studentForm">
@@ -94,9 +92,6 @@
             <input type="text" id="studentClass" placeholder="ชั้นเรียน (เช่น ป.1/1)" required>
             <button type="submit" id="submitStudentForm">เพิ่มนักเรียน</button>
         </form>
-
-        <!-- ส่วน Excel Import จะเอาออกก่อน เพราะตอนนี้เราเน้นที่ Google Sheet โดยตรง -->
-        <!-- หากต้องการเก็บไว้ ต้องปรับให้เรียก Apps Script สำหรับการ import -->
 
         <h3>รายชื่อนักเรียน</h3>
         <table id="studentListTable">
@@ -110,12 +105,10 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- ข้อมูลนักเรียนจะถูกเพิ่มที่นี่ -->
             </tbody>
         </table>
     </div>
 
-    <!-- ส่วนแดชบอร์ด -->
     <div id="dashboardSection" class="container hidden">
         <h2>แดชบอร์ดรายงานคะแนน</h2>
         <table id="dashboardTable">
@@ -128,7 +121,6 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- ข้อมูลคะแนนนักเรียนจะถูกเพิ่มที่นี่ -->
             </tbody>
         </table>
     </div>
@@ -148,36 +140,47 @@
     const dashboardSection = document.getElementById('dashboardSection');
     const loadingIndicator = document.getElementById('loading');
 
-    // !!! สำคัญมาก: ใส่ URL ของ Google Apps Script Web App ที่ Deploy ไว้ตรงนี้ !!!
-    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwPTjvYZWdL-hPf2kCg8i1wcfYkNHM4lLLmTCDgRCi1N29gO1iLxX5rSE4BnaszKRbd/exec'; 
+    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwPTjvYZWdL-hPf2kCg8i1wcfYkNHM4lLLmTCDgRCi1N29gO1iLxX5rSE4BnaszKRbd/exec';
 
-    let students = []; // เก็บข้อมูลนักเรียนที่โหลดมา
+    let students = [];
     let editingStudentId = null;
 
-    function showLoading() {
-        loadingIndicator.classList.remove('hidden');
-    }
-    function hideLoading() {
-        loadingIndicator.classList.add('hidden');
-    }
+    function showLoading() { loadingIndicator.classList.remove('hidden'); }
+    function hideLoading() { loadingIndicator.classList.add('hidden'); }
 
     async function fetchDataFromGoogleSheet() {
         showLoading();
         try {
-            const response = await fetch(GAS_WEB_APP_URL); // doGet by default
+            const response = await fetch(GAS_WEB_APP_URL);
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
             }
             const data = await response.json();
-            if (data.error) {
-                throw new Error(`Apps Script Error: ${data.error}`);
+
+            if (data.error) { // ตรวจสอบ error จาก Apps Script ก่อน
+                console.error('Apps Script Error:', data.error, data.details);
+                throw new Error(data.details || data.error || 'Unknown error from Google Sheet (server-side).');
             }
-            students = data.map(s => ({...s, id: s.id.toString() })); // Ensure ID is string
+
+            // ตรวจสอบว่า data เป็น array จริงๆ ก่อน map
+            if (!Array.isArray(data)) {
+                console.error('Invalid data format from server. Expected an array.', data);
+                throw new Error('ได้รับข้อมูลในรูปแบบที่ไม่ถูกต้องจากเซิร์ฟเวอร์');
+            }
+
+            students = data.map(s => ({
+                ...s,
+                id: s.id ? s.id.toString() : Date.now().toString() + Math.random().toString(36).substr(2, 9), // ถ้า id เป็น null ให้สร้าง id ชั่วคราว (ควรไม่เกิดขึ้นถ้า GAS ทำงานถูก)
+                name: s.name || "",
+                class: s.class || "",
+                points: parseInt(s.points) || 0
+            }));
+
             renderStudentList();
-            renderDashboard(); // อาจจะ render ทันที หรือเมื่อกด tab ก็ได้
+            renderDashboard();
         } catch (error) {
             console.error('Error fetching data from Google Sheet:', error);
-            alert('เกิดข้อผิดพลาดในการโหลดข้อมูลจาก Google Sheet: ' + error.message);
+            alert('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message);
             studentListTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">ไม่สามารถโหลดข้อมูลได้</td></tr>';
         } finally {
             hideLoading();
@@ -189,30 +192,33 @@
         try {
             const response = await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
-                mode: 'cors', // จำเป็นถ้า GAS และ HTML ไม่ได้อยู่ domain เดียวกัน (ซึ่งปกติเป็นแบบนั้น)
+                // mode: 'cors', // fetch API จะจัดการ CORS โดยอัตโนมัติเมื่อ cross-origin ไม่จำเป็นต้องใส่ mode: 'cors' อย่างชัดเจน เว้นแต่ต้องการ no-cors หรือ same-origin
                 cache: 'no-cache',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(payload),
-                redirect: "follow" // Apps Script Web Apps มักจะ redirect
+                redirect: "follow"
             });
-            
-            // Apps Script Web Apps ที่ deploy แบบ "anonymous" มักจะ return text/plain ก่อน redirect
-            // ดังนั้นเราอาจจะต้องอ่าน text response แล้ว parse เอง
+
             const textResponse = await response.text();
             let result;
             try {
                 result = JSON.parse(textResponse);
             } catch (e) {
-                // ถ้า JSON.parse ไม่ได้ อาจเป็นเพราะ response ไม่ใช่ JSON (เช่น หน้า error ของ Google)
-                console.error("Failed to parse JSON response from Apps Script:", textResponse);
-                throw new Error("Response from server was not valid JSON.");
+                console.error("Failed to parse JSON response from Apps Script:", textResponse, e);
+                // หาก textResponse ไม่ใช่ JSON และ response.ok เป็น false แสดงว่าอาจมี HTML error page จาก Google
+                if (!response.ok) {
+                     throw new Error(`Server responded with status ${response.status}: ${response.statusText}. Response body: ${textResponse.substring(0,500)}...`);
+                }
+                throw new Error("Response from server was not valid JSON. Body: " + textResponse.substring(0,500) + "...");
             }
 
-            if (!result || result.success === false) { // ตรวจสอบ result.success
+            if (!result || result.success === false) {
+                console.error('Operation failed on server:', result);
                 throw new Error(result.message || result.error || 'Unknown error from Google Sheet API.');
             }
+
             console.log('Operation successful:', result);
             await fetchDataFromGoogleSheet(); // โหลดข้อมูลใหม่หลังการดำเนินการสำเร็จ
             return result;
@@ -220,7 +226,6 @@
         } catch (error) {
             console.error('Error sending data to Google Sheet:', error);
             alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + error.message);
-            // ไม่ได้โหลดข้อมูลใหม่ถ้า error เพื่อให้ user เห็นข้อมูลเดิม
             return { success: false, error: error.message };
         } finally {
             hideLoading();
@@ -229,19 +234,22 @@
 
     function renderStudentList() {
         studentListTableBody.innerHTML = '';
-        if (students.length === 0 && !loadingIndicator.classList.contains('hidden')) {
-             // ถ้ากำลังโหลด ไม่ต้องแสดงว่า "ยังไม่มีข้อมูล"
-        } else if (students.length === 0) {
+        if (students.length === 0 && loadingIndicator.classList.contains('hidden')) { // แสดงเมื่อโหลดเสร็จและไม่มีข้อมูล
             studentListTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">ยังไม่มีข้อมูลนักเรียน</td></tr>';
             return;
+        } else if (students.length === 0 && !loadingIndicator.classList.contains('hidden')) {
+            // กำลังโหลด ไม่ต้องทำอะไร รอให้ fetchDataFromGoogleSheet จัดการ
+            return;
         }
+
         students.forEach(student => {
             const row = studentListTableBody.insertRow();
+            // ตรวจสอบค่า null/undefined ก่อนแสดงผล เพื่อความปลอดภัย
             row.innerHTML = `
-                <td>${student.id}</td>
-                <td>${student.name}</td>
-                <td>${student.class}</td>
-                <td>${student.points}</td>
+                <td>${student.id || 'N/A'}</td>
+                <td>${student.name || 'ไม่มีชื่อ'}</td>
+                <td>${student.class || 'ไม่มีชั้นเรียน'}</td>
+                <td>${student.points || 0}</td>
                 <td class="actions">
                     <button class="btn-add-point" onclick="addPointToStudent('${student.id}')">ให้คะแนน (+1)</button>
                     <button class="btn-edit" onclick="editStudentHandler('${student.id}')">แก้ไข</button>
@@ -257,14 +265,14 @@
             dashboardTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">ยังไม่มีข้อมูลนักเรียน</td></tr>';
             return;
         }
-        const sortedStudents = [...students].sort((a, b) => b.points - a.points);
+        const sortedStudents = [...students].sort((a, b) => (b.points || 0) - (a.points || 0));
         sortedStudents.forEach((student, index) => {
             const row = dashboardTableBody.insertRow();
             row.innerHTML = `
                 <td>${index + 1}</td>
-                <td>${student.name}</td>
-                <td>${student.class}</td>
-                <td>${student.points}</td>
+                <td>${student.name || 'ไม่มีชื่อ'}</td>
+                <td>${student.class || 'ไม่มีชั้นเรียน'}</td>
+                <td>${student.points || 0}</td>
             `;
         });
     }
@@ -290,40 +298,46 @@
         if (editingStudentId) {
             payload = {
                 action: 'UPDATE_STUDENT',
-                id: editingStudentId,
+                id: editingStudentId.toString(), // Ensure ID is string
                 name: name,
                 class: studentClass
             };
         } else {
             payload = {
                 action: 'CREATE',
-                id: Date.now().toString(), // สร้าง ID จาก Client ก่อน
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 5), // Client-side generated ID
                 name: name,
                 class: studentClass
-                // Points จะถูกตั้งเป็น 0 ใน Apps Script
             };
         }
         
         const result = await sendDataToGoogleSheet(payload);
-        if (result.success) {
+        if (result && result.success) { // ตรวจสอบ result ก่อนเข้าถึง success
             resetForm();
         }
     });
     
     window.editStudentHandler = function(id) {
-        const student = students.find(s => s.id.toString() === id.toString());
+        const studentIdStr = id.toString();
+        const student = students.find(s => s.id && s.id.toString() === studentIdStr);
         if (student) {
             studentIdInput.value = student.id;
-            studentNameInput.value = student.name;
-            studentClassInput.value = student.class;
+            studentNameInput.value = student.name || "";
+            studentClassInput.value = student.class || "";
             editingStudentId = student.id;
             submitStudentFormButton.textContent = 'บันทึกการแก้ไข';
             studentForm.scrollIntoView({ behavior: 'smooth' });
             switchToStudentManagementView();
+        } else {
+            console.warn(`Student with ID ${id} not found for editing.`);
         }
     }
 
     window.addPointToStudent = async function(id) {
+        if (!id) {
+            alert("ไม่พบ ID นักเรียนสำหรับให้คะแนน");
+            return;
+        }
         const payload = {
             action: 'ADD_POINT',
             id: id.toString()
@@ -332,13 +346,17 @@
     }
 
     window.deleteStudent = async function(id) {
+        if (!id) {
+            alert("ไม่พบ ID นักเรียนสำหรับลบ");
+            return;
+        }
         if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนักเรียนคนนี้?')) {
             const payload = {
                 action: 'DELETE',
                 id: id.toString()
             };
             const result = await sendDataToGoogleSheet(payload);
-            if (result.success && editingStudentId === id) {
+            if (result && result.success && editingStudentId && editingStudentId.toString() === id.toString()) {
                 resetForm();
             }
         }
@@ -356,14 +374,14 @@
         dashboardSection.classList.remove('hidden');
         navStudentMgmtBtn.classList.remove('active');
         navDashboardBtn.classList.add('active');
-        renderDashboard(); // re-render dashboard based on current `students` array
+        renderDashboard();
     }
 
     navStudentMgmtBtn.addEventListener('click', switchToStudentManagementView);
     navDashboardBtn.addEventListener('click', switchToDashboardView);
 
     document.addEventListener('DOMContentLoaded', () => {
-        fetchDataFromGoogleSheet(); // โหลดข้อมูลเมื่อหน้าเว็บพร้อม
+        fetchDataFromGoogleSheet();
         switchToStudentManagementView();
     });
 
