@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบบันทึกความดี (ฟ้า-ขาว มินิมอล)</title>
-    <!-- SheetJS library for Excel import -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <title>ระบบบันทึกความดี (Google Sheet)</title>
+    <!-- ไม่ต้องใช้ SheetJS library แล้ว ถ้าไม่ได้ import จาก excel โดยตรงอีก -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap');
 
@@ -13,7 +12,7 @@
             font-family: 'Sarabun', sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #F0F8FF; /* AliceBlue - ฟ้าอ่อนๆ */
+            background-color: #F0F8FF; /* AliceBlue */
             color: #333;
             display: flex;
             flex-direction: column;
@@ -21,7 +20,7 @@
             min-height: 100vh;
         }
         .container {
-            background-color: #FFFFFF; /* ขาว */
+            background-color: #FFFFFF;
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
@@ -30,124 +29,61 @@
             margin-bottom: 25px;
         }
         h1, h2 {
-            color: #007BFF; /* ฟ้าสดใส */
+            color: #007BFF;
             text-align: center;
             margin-bottom: 20px;
         }
-        h1 {
-            font-size: 2.2em;
-            margin-bottom: 30px;
-        }
-        h2 {
-            font-size: 1.8em;
-        }
-        nav {
-            margin-bottom: 25px;
-            text-align: center;
-        }
+        h1 { font-size: 2.2em; margin-bottom: 30px; }
+        h2 { font-size: 1.8em; }
+        nav { margin-bottom: 25px; text-align: center; }
         nav button {
-            background-color: #007BFF; /* ฟ้า */
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            margin: 0 8px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
+            background-color: #007BFF; color: white; border: none;
+            padding: 12px 20px; margin: 0 8px; border-radius: 8px;
+            cursor: pointer; font-size: 1em; transition: background-color 0.3s ease;
         }
-        nav button:hover {
-            background-color: #0056b3; /* ฟ้าเข้มขึ้น */
-        }
+        nav button:hover { background-color: #0056b3; }
         nav button.active {
-            background-color: #0056b3; /* ฟ้าเข้มสำหรับ active */
+            background-color: #0056b3;
             box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px #0056b3;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #E0E0E0; /* เทาอ่อน */
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #EAF6FF; /* ฟ้าอ่อนมาก */
-            color: #0056b3; /* ฟ้าเข้ม */
-            font-weight: bold;
-        }
-        tr:nth-child(even) {
-            background-color: #F8F9FA; /* ขาวเทาอ่อนๆ */
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #E0E0E0; padding: 12px; text-align: left; }
+        th { background-color: #EAF6FF; color: #0056b3; font-weight: bold; }
+        tr:nth-child(even) { background-color: #F8F9FA; }
         .actions button {
-            margin-right: 6px;
-            padding: 6px 10px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: opacity 0.2s ease;
+            margin-right: 6px; padding: 6px 10px; border-radius: 5px;
+            border: none; cursor: pointer; font-size: 0.9em; transition: opacity 0.2s ease;
         }
-        .actions button:hover {
-            opacity: 0.8;
-        }
-        .btn-edit { background-color: #FFC107; color: #333; } /* เหลือง */
-        .btn-delete { background-color: #DC3545; color: white; } /* แดง */
-        .btn-add-point { background-color: #28A745; color: white; } /* เขียว */
+        .actions button:hover { opacity: 0.8; }
+        .btn-edit { background-color: #FFC107; color: #333; }
+        .btn-delete { background-color: #DC3545; color: white; }
+        .btn-add-point { background-color: #28A745; color: white; }
 
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        form input[type="text"], form input[type="file"] {
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #B0C4DE; /* LightSteelBlue */
-            font-size: 1em;
-        }
-        form input[type="file"] {
-            border: 1px dashed #007BFF;
-            background-color: #f0f8ff;
+        form { display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; }
+        form input[type="text"] {
+            padding: 12px; border-radius: 8px;
+            border: 1px solid #B0C4DE; font-size: 1em;
         }
         form button {
-            background-color: #007BFF; /* ฟ้า */
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1em;
-            transition: background-color 0.3s ease;
+            background-color: #007BFF; color: white; padding: 12px;
+            border-radius: 8px; border: none; cursor: pointer;
+            font-size: 1.1em; transition: background-color 0.3s ease;
         }
-        form button:hover {
-            background-color: #0056b3;
-        }
-        .hidden {
-            display: none;
-        }
-        .excel-import-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #E0E0E0;
-        }
-        .excel-import-section h3 {
-            color: #007BFF;
-            margin-bottom: 10px;
-        }
+        form button:hover { background-color: #0056b3; }
+        .hidden { display: none; }
+        .loading-indicator { text-align: center; padding: 20px; font-style: italic; color: #007BFF;}
     </style>
 </head>
 <body>
 
-    <h1>ระบบบันทึกความดี (ฟ้า-ขาว)</h1>
+    <h1>ระบบบันทึกความดี (Google Sheet)</h1>
 
     <nav>
         <button id="navStudentMgmt" class="active">จัดการข้อมูลนักเรียน</button>
         <button id="navDashboard">แดชบอร์ดคะแนน</button>
     </nav>
+
+    <div id="loading" class="loading-indicator hidden">กำลังโหลดข้อมูล...</div>
 
     <!-- ส่วนจัดการข้อมูลนักเรียน -->
     <div id="studentManagementSection" class="container">
@@ -159,12 +95,8 @@
             <button type="submit" id="submitStudentForm">เพิ่มนักเรียน</button>
         </form>
 
-        <div class="excel-import-section">
-            <h3>นำเข้าข้อมูลจาก Excel (.xlsx)</h3>
-            <p style="font-size:0.9em; color:#555;">ไฟล์ Excel ควรมี 2 คอลัมน์: คอลัมน์แรกคือ 'ชื่อ-สกุล', คอลัมน์ที่สองคือ 'ชั้นเรียน' (ไม่ต้องมีหัวตาราง หรือถ้ามี แถวแรกจะถูกข้ามไป)</p>
-            <input type="file" id="excelFile" accept=".xlsx, .xls">
-            <button id="importExcelBtn" style="margin-top:10px; background-color:#17A2B8;">นำเข้าข้อมูลจากไฟล์</button>
-        </div>
+        <!-- ส่วน Excel Import จะเอาออกก่อน เพราะตอนนี้เราเน้นที่ Google Sheet โดยตรง -->
+        <!-- หากต้องการเก็บไว้ ต้องปรับให้เรียก Apps Script สำหรับการ import -->
 
         <h3>รายชื่อนักเรียน</h3>
         <table id="studentListTable">
@@ -214,42 +146,92 @@
     const navDashboardBtn = document.getElementById('navDashboard');
     const studentManagementSection = document.getElementById('studentManagementSection');
     const dashboardSection = document.getElementById('dashboardSection');
+    const loadingIndicator = document.getElementById('loading');
 
-    const excelFileInput = document.getElementById('excelFile');
-    const importExcelBtn = document.getElementById('importExcelBtn');
+    // !!! สำคัญมาก: ใส่ URL ของ Google Apps Script Web App ที่ Deploy ไว้ตรงนี้ !!!
+    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxRBm4Pu8CQoK1MJaRQRkdu3Acbtsw2K4gwOlDYkMJVk6mGZtMNcY-vilEnJzxrTTne/exec'; 
 
-    const STORAGE_KEY = 'goodDeedsStudents_v2'; // เปลี่ยน key เผื่อมีข้อมูลเก่า
-
-    let students = [];
+    let students = []; // เก็บข้อมูลนักเรียนที่โหลดมา
     let editingStudentId = null;
 
-    function getInitialStudents() {
-        return [
-            { id: Date.now() + 1, name: 'น้องฟ้าใส ใจดี', class: 'ป.1/1', points: 10 },
-            { id: Date.now() + 2, name: 'พี่เมฆา ช่วยเหลือ', class: 'ป.1/2', points: 5 },
-            { id: Date.now() + 3, name: 'ดาวประกาย ตั้งใจเรียน', class: 'ป.2/1', points: 12 },
-            { id: Date.now() + 4, name: 'สายรุ้ง แบ่งปัน', class: 'ป.2/1', points: 8 },
-            { id: Date.now() + 5, name: 'ตะวัน ยิ้มง่าย', class: 'ป.3/1', points: 3 }
-        ];
+    function showLoading() {
+        loadingIndicator.classList.remove('hidden');
+    }
+    function hideLoading() {
+        loadingIndicator.classList.add('hidden');
     }
 
-    function loadStudentsFromStorage() {
-        const storedStudents = localStorage.getItem(STORAGE_KEY);
-        if (storedStudents) {
-            students = JSON.parse(storedStudents);
-        } else {
-            students = getInitialStudents();
-            saveStudentsToStorage();
+    async function fetchDataFromGoogleSheet() {
+        showLoading();
+        try {
+            const response = await fetch(GAS_WEB_APP_URL); // doGet by default
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(`Apps Script Error: ${data.error}`);
+            }
+            students = data.map(s => ({...s, id: s.id.toString() })); // Ensure ID is string
+            renderStudentList();
+            renderDashboard(); // อาจจะ render ทันที หรือเมื่อกด tab ก็ได้
+        } catch (error) {
+            console.error('Error fetching data from Google Sheet:', error);
+            alert('เกิดข้อผิดพลาดในการโหลดข้อมูลจาก Google Sheet: ' + error.message);
+            studentListTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">ไม่สามารถโหลดข้อมูลได้</td></tr>';
+        } finally {
+            hideLoading();
         }
     }
 
-    function saveStudentsToStorage() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
+    async function sendDataToGoogleSheet(payload) {
+        showLoading();
+        try {
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                mode: 'cors', // จำเป็นถ้า GAS และ HTML ไม่ได้อยู่ domain เดียวกัน (ซึ่งปกติเป็นแบบนั้น)
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+                redirect: "follow" // Apps Script Web Apps มักจะ redirect
+            });
+            
+            // Apps Script Web Apps ที่ deploy แบบ "anonymous" มักจะ return text/plain ก่อน redirect
+            // ดังนั้นเราอาจจะต้องอ่าน text response แล้ว parse เอง
+            const textResponse = await response.text();
+            let result;
+            try {
+                result = JSON.parse(textResponse);
+            } catch (e) {
+                // ถ้า JSON.parse ไม่ได้ อาจเป็นเพราะ response ไม่ใช่ JSON (เช่น หน้า error ของ Google)
+                console.error("Failed to parse JSON response from Apps Script:", textResponse);
+                throw new Error("Response from server was not valid JSON.");
+            }
+
+            if (!result || result.success === false) { // ตรวจสอบ result.success
+                throw new Error(result.message || result.error || 'Unknown error from Google Sheet API.');
+            }
+            console.log('Operation successful:', result);
+            await fetchDataFromGoogleSheet(); // โหลดข้อมูลใหม่หลังการดำเนินการสำเร็จ
+            return result;
+
+        } catch (error) {
+            console.error('Error sending data to Google Sheet:', error);
+            alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + error.message);
+            // ไม่ได้โหลดข้อมูลใหม่ถ้า error เพื่อให้ user เห็นข้อมูลเดิม
+            return { success: false, error: error.message };
+        } finally {
+            hideLoading();
+        }
     }
 
     function renderStudentList() {
         studentListTableBody.innerHTML = '';
-        if (students.length === 0) {
+        if (students.length === 0 && !loadingIndicator.classList.contains('hidden')) {
+             // ถ้ากำลังโหลด ไม่ต้องแสดงว่า "ยังไม่มีข้อมูล"
+        } else if (students.length === 0) {
             studentListTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">ยังไม่มีข้อมูลนักเรียน</td></tr>';
             return;
         }
@@ -261,9 +243,9 @@
                 <td>${student.class}</td>
                 <td>${student.points}</td>
                 <td class="actions">
-                    <button class="btn-add-point" onclick="addPointToStudent(${student.id})">ให้คะแนน (+1)</button>
-                    <button class="btn-edit" onclick="editStudentHandler(${student.id})">แก้ไข</button>
-                    <button class="btn-delete" onclick="deleteStudent(${student.id})">ลบ</button>
+                    <button class="btn-add-point" onclick="addPointToStudent('${student.id}')">ให้คะแนน (+1)</button>
+                    <button class="btn-edit" onclick="editStudentHandler('${student.id}')">แก้ไข</button>
+                    <button class="btn-delete" onclick="deleteStudent('${student.id}')">ลบ</button>
                 </td>
             `;
         });
@@ -294,18 +276,7 @@
         submitStudentFormButton.textContent = 'เพิ่มนักเรียน';
     }
 
-    function addStudent(name, studentClass, points = 0, id = Date.now()) {
-        // ตรวจสอบว่ามีนักเรียนชื่อและชั้นซ้ำหรือไม่ (ถ้าต้องการ)
-        // const existingStudent = students.find(s => s.name === name && s.class === studentClass);
-        // if (existingStudent) {
-        //     alert(`นักเรียนชื่อ ${name} ชั้น ${studentClass} มีในระบบแล้ว`);
-        //     return;
-        // }
-        const newStudent = { id, name, class: studentClass, points };
-        students.push(newStudent);
-    }
-
-    studentForm.addEventListener('submit', function(event) {
+    studentForm.addEventListener('submit', async function(event) {
         event.preventDefault();
         const name = studentNameInput.value.trim();
         const studentClass = studentClassInput.value.trim();
@@ -315,43 +286,32 @@
             return;
         }
 
+        let payload;
         if (editingStudentId) {
-            updateStudent(editingStudentId, name, studentClass);
+            payload = {
+                action: 'UPDATE_STUDENT',
+                id: editingStudentId,
+                name: name,
+                class: studentClass
+            };
         } else {
-            addStudent(name, studentClass); // เพิ่มทีละคนผ่านฟอร์ม
-            saveStudentsToStorage(); // บันทึกหลังเพิ่ม
-            renderStudentList();
-            renderDashboard();
+            payload = {
+                action: 'CREATE',
+                id: Date.now().toString(), // สร้าง ID จาก Client ก่อน
+                name: name,
+                class: studentClass
+                // Points จะถูกตั้งเป็น 0 ใน Apps Script
+            };
+        }
+        
+        const result = await sendDataToGoogleSheet(payload);
+        if (result.success) {
             resetForm();
         }
     });
     
-    function updateStudent(id, name, studentClass) {
-        const studentIndex = students.findIndex(s => s.id === id);
-        if (studentIndex > -1) {
-            students[studentIndex].name = name;
-            students[studentIndex].class = studentClass;
-            saveStudentsToStorage();
-            renderStudentList();
-            renderDashboard();
-            resetForm();
-        }
-    }
-
-    window.deleteStudent = function(id) {
-        if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนักเรียนคนนี้?')) {
-            students = students.filter(s => s.id !== id);
-            saveStudentsToStorage();
-            renderStudentList();
-            renderDashboard();
-            if (editingStudentId === id) {
-                resetForm();
-            }
-        }
-    }
-
     window.editStudentHandler = function(id) {
-        const student = students.find(s => s.id === id);
+        const student = students.find(s => s.id.toString() === id.toString());
         if (student) {
             studentIdInput.value = student.id;
             studentNameInput.value = student.name;
@@ -363,97 +323,26 @@
         }
     }
 
-    window.addPointToStudent = function(id) {
-        const studentIndex = students.findIndex(s => s.id === id);
-        if (studentIndex > -1) {
-            students[studentIndex].points += 1;
-            saveStudentsToStorage();
-            renderStudentList();
-            renderDashboard();
-        }
+    window.addPointToStudent = async function(id) {
+        const payload = {
+            action: 'ADD_POINT',
+            id: id.toString()
+        };
+        await sendDataToGoogleSheet(payload);
     }
 
-    // --- Excel Import ---
-    importExcelBtn.addEventListener('click', () => {
-        const file = excelFileInput.files[0];
-        if (!file) {
-            alert("กรุณาเลือกไฟล์ Excel ก่อนค่ะ");
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const data = new Uint8Array(event.target.result);
-            try {
-                const workbook = XLSX.read(data, {type: 'array'});
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                
-                // header: 1 จะได้ array ของ arrays
-                // หรือถ้ามั่นใจว่ามี header สามารถใช้ XLSX.utils.sheet_to_json(worksheet)
-                // แต่ถ้าใช้ header:1 จะยืดหยุ่นกว่าถ้าไฟล์ไม่มี header row
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
-
-                if (jsonData.length === 0) {
-                    alert("ไฟล์ Excel ว่างเปล่า หรือไม่สามารถอ่านข้อมูลได้ค่ะ");
-                    return;
-                }
-                
-                let importedCount = 0;
-                // สมมติว่าแถวแรกอาจเป็น header ถ้ามีข้อมูลจริงเริ่มจากแถวที่ 2 (index 1)
-                // หรือถ้าไฟล์ไม่มี header ก็เริ่มจาก jsonData[0]
-                // ในที่นี้จะสมมติว่าข้อมูลเริ่มตั้งแต่แถวแรกเลย (ถ้ามี header ก็จะพยายาม import header ด้วย)
-                // หรือจะให้ดีคือข้ามแถวแรกไปเลย jsonData.slice(1).forEach(...)
-                
-                // ตัวอย่างนี้จะเริ่มอ่านจากแถวแรกเลย
-                // คาดหวัง: คอลัมน์ A (index 0) = ชื่อ, คอลัมน์ B (index 1) = ชั้นเรียน
-                jsonData.forEach((row, rowIndex) => {
-                    // ข้ามแถวที่เป็น header (ถ้าไฟล์ Excel มี)
-                    // นี่คือตัวอย่างแบบง่าย ถ้าแถวแรกเป็น header จริงๆ ควรจะมี logic ตรวจสอบ
-                    // หรือกำหนดให้ผู้ใช้ว่าไฟล์ต้องไม่มี header
-                    // if (rowIndex === 0 && typeof row[0] === 'string' && row[0].toLowerCase().includes('ชื่อ')) {
-                    //     console.log("Skipping header row:", row);
-                    //     return; // ข้าม header
-                    // }
-
-                    const name = row[0] ? String(row[0]).trim() : null;
-                    const studentClass = row[1] ? String(row[1]).trim() : null;
-
-                    if (name && studentClass) {
-                        // ตรวจสอบว่าซ้ำหรือไม่ ก่อนเพิ่ม (ทางเลือก)
-                        const existing = students.find(s => s.name === name && s.class === studentClass);
-                        if (!existing) {
-                            addStudent(name, studentClass, 0, Date.now() + students.length + 1); // ให้ ID ไม่ซ้ำกับของเดิม
-                            importedCount++;
-                        } else {
-                            console.log(`Student ${name} (${studentClass}) already exists. Skipping.`);
-                        }
-                    } else {
-                        console.warn(`Skipping row ${rowIndex + 1} due to missing name or class:`, row);
-                    }
-                });
-
-                if (importedCount > 0) {
-                    saveStudentsToStorage();
-                    renderStudentList();
-                    renderDashboard();
-                    alert(`นำเข้าข้อมูลนักเรียน ${importedCount} คนสำเร็จ!`);
-                } else if (jsonData.length > 0 && importedCount === 0) {
-                    alert("ไม่พบข้อมูลนักเรียนใหม่ที่สามารถนำเข้าได้ (อาจมีข้อมูลซ้ำทั้งหมด หรือรูปแบบไม่ถูกต้อง)");
-                }
-                excelFileInput.value = ''; // เคลียร์ไฟล์ input
-
-            } catch (error) {
-                console.error("Error processing Excel file:", error);
-                alert("เกิดข้อผิดพลาดในการประมวลผลไฟล์ Excel ค่ะ กรุณาตรวจสอบรูปแบบไฟล์");
+    window.deleteStudent = async function(id) {
+        if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนักเรียนคนนี้?')) {
+            const payload = {
+                action: 'DELETE',
+                id: id.toString()
+            };
+            const result = await sendDataToGoogleSheet(payload);
+            if (result.success && editingStudentId === id) {
+                resetForm();
             }
-        };
-        reader.onerror = function() {
-            alert("ไม่สามารถอ่านไฟล์ได้ค่ะ");
-        };
-        reader.readAsArrayBuffer(file);
-    });
-
+        }
+    }
 
     function switchToStudentManagementView() {
         studentManagementSection.classList.remove('hidden');
@@ -467,15 +356,14 @@
         dashboardSection.classList.remove('hidden');
         navStudentMgmtBtn.classList.remove('active');
         navDashboardBtn.classList.add('active');
-        renderDashboard();
+        renderDashboard(); // re-render dashboard based on current `students` array
     }
 
     navStudentMgmtBtn.addEventListener('click', switchToStudentManagementView);
     navDashboardBtn.addEventListener('click', switchToDashboardView);
 
     document.addEventListener('DOMContentLoaded', () => {
-        loadStudentsFromStorage();
-        renderStudentList();
+        fetchDataFromGoogleSheet(); // โหลดข้อมูลเมื่อหน้าเว็บพร้อม
         switchToStudentManagementView();
     });
 
