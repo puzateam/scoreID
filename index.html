@@ -6,84 +6,39 @@
     <title>ระบบบันทึกความดี (Google Sheet)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap');
-
-        body {
-            font-family: 'Sarabun', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #F0F8FF; /* AliceBlue */
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            background-color: #FFFFFF;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            width: 95%;
-            max-width: 850px;
-            margin-bottom: 25px;
-        }
-        h1, h2 {
-            color: #007BFF;
-            text-align: center;
-            margin-bottom: 20px;
-        }
+        body { font-family: 'Sarabun', sans-serif; margin: 0; padding: 20px; background-color: #F0F8FF; color: #333; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .container { background-color: #FFFFFF; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); width: 95%; max-width: 850px; margin-bottom: 25px; }
+        h1, h2 { color: #007BFF; text-align: center; margin-bottom: 20px; }
         h1 { font-size: 2.2em; margin-bottom: 30px; }
         h2 { font-size: 1.8em; }
         nav { margin-bottom: 25px; text-align: center; }
-        nav button {
-            background-color: #007BFF; color: white; border: none;
-            padding: 12px 20px; margin: 0 8px; border-radius: 8px;
-            cursor: pointer; font-size: 1em; transition: background-color 0.3s ease;
-        }
+        nav button { background-color: #007BFF; color: white; border: none; padding: 12px 20px; margin: 0 8px; border-radius: 8px; cursor: pointer; font-size: 1em; transition: background-color 0.3s ease; }
         nav button:hover { background-color: #0056b3; }
-        nav button.active {
-            background-color: #0056b3;
-            box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px #0056b3;
-        }
+        nav button.active { background-color: #0056b3; box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px #0056b3; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #E0E0E0; padding: 12px; text-align: left; }
+        th, td { border: 1px solid #E0E0E0; padding: 12px; text-align: left; word-break: break-word; }
         th { background-color: #EAF6FF; color: #0056b3; font-weight: bold; }
         tr:nth-child(even) { background-color: #F8F9FA; }
-        .actions button {
-            margin-right: 6px; padding: 6px 10px; border-radius: 5px;
-            border: none; cursor: pointer; font-size: 0.9em; transition: opacity 0.2s ease;
-        }
+        .actions button { margin-right: 6px; padding: 6px 10px; border-radius: 5px; border: none; cursor: pointer; font-size: 0.9em; transition: opacity 0.2s ease; white-space: nowrap; }
         .actions button:hover { opacity: 0.8; }
         .btn-edit { background-color: #FFC107; color: #333; }
         .btn-delete { background-color: #DC3545; color: white; }
         .btn-add-point { background-color: #28A745; color: white; }
-
         form { display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; }
-        form input[type="text"] {
-            padding: 12px; border-radius: 8px;
-            border: 1px solid #B0C4DE; font-size: 1em;
-        }
-        form button {
-            background-color: #007BFF; color: white; padding: 12px;
-            border-radius: 8px; border: none; cursor: pointer;
-            font-size: 1.1em; transition: background-color 0.3s ease;
-        }
+        form input[type="text"] { padding: 12px; border-radius: 8px; border: 1px solid #B0C4DE; font-size: 1em; }
+        form button { background-color: #007BFF; color: white; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-size: 1.1em; transition: background-color 0.3s ease; }
         form button:hover { background-color: #0056b3; }
         .hidden { display: none; }
         .loading-indicator { text-align: center; padding: 20px; font-style: italic; color: #007BFF;}
     </style>
 </head>
 <body>
-
     <h1>ระบบบันทึกความดี (Google Sheet)</h1>
-
     <nav>
         <button id="navStudentMgmt" class="active">จัดการข้อมูลนักเรียน</button>
         <button id="navDashboard">แดชบอร์ดคะแนน</button>
     </nav>
-
     <div id="loading" class="loading-indicator hidden">กำลังโหลดข้อมูล...</div>
-
     <div id="studentManagementSection" class="container">
         <h2>จัดการข้อมูลนักเรียน</h2>
         <form id="studentForm">
@@ -92,39 +47,19 @@
             <input type="text" id="studentClass" placeholder="ชั้นเรียน (เช่น ป.1/1)" required>
             <button type="submit" id="submitStudentForm">เพิ่มนักเรียน</button>
         </form>
-
         <h3>รายชื่อนักเรียน</h3>
         <table id="studentListTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>ชื่อ-สกุล</th>
-                    <th>ชั้นเรียน</th>
-                    <th>คะแนนความดี</th>
-                    <th>การกระทำ</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
+            <thead><tr><th>ID</th><th>ชื่อ-สกุล</th><th>ชั้นเรียน</th><th>คะแนนความดี</th><th>การกระทำ</th></tr></thead>
+            <tbody></tbody>
         </table>
     </div>
-
     <div id="dashboardSection" class="container hidden">
         <h2>แดชบอร์ดรายงานคะแนน</h2>
         <table id="dashboardTable">
-            <thead>
-                <tr>
-                    <th>อันดับ</th>
-                    <th>ชื่อ-สกุล</th>
-                    <th>ชั้นเรียน</th>
-                    <th>คะแนนความดีสะสม</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
+            <thead><tr><th>อันดับ</th><th>ชื่อ-สกุล</th><th>ชั้นเรียน</th><th>คะแนนความดีสะสม</th></tr></thead>
+            <tbody></tbody>
         </table>
     </div>
-
 <script>
     const studentForm = document.getElementById('studentForm');
     const studentIdInput = document.getElementById('studentId');
@@ -133,14 +68,14 @@
     const submitStudentFormButton = document.getElementById('submitStudentForm');
     const studentListTableBody = document.querySelector('#studentListTable tbody');
     const dashboardTableBody = document.querySelector('#dashboardTable tbody');
-
     const navStudentMgmtBtn = document.getElementById('navStudentMgmt');
     const navDashboardBtn = document.getElementById('navDashboard');
     const studentManagementSection = document.getElementById('studentManagementSection');
     const dashboardSection = document.getElementById('dashboardSection');
     const loadingIndicator = document.getElementById('loading');
 
-    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyMbHQbGlS_lcZsaHXQ0soDcz3EgTY55rUZ_lIjYTxsxHLfA9DTfHYKnGECatdJKRYJ/exec';
+    // ---!!! สำคัญ: แก้ไข URL นี้ให้เป็น URL /exec ล่าสุดของพี่ !!!---
+    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyMbHQbGlS_lcZsaHXQ0soDcz3EgTY55rUZ_lIjYTxsxHLfA9DTfHYKnGECatdJKRYJ/exec'; // <--- แก้ไขตรงนี้
 
     let students = [];
     let editingStudentId = null;
@@ -150,38 +85,34 @@
 
     async function fetchDataFromGoogleSheet() {
         showLoading();
+        studentListTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">กำลังโหลดข้อมูล...</td></tr>'; // แสดงสถานะในตาราง
         try {
             const response = await fetch(GAS_WEB_APP_URL);
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status} ${response.statusText}. Server response: ${errorText.substring(0, 200)}...`);
             }
             const data = await response.json();
-
-            if (data.error) { // ตรวจสอบ error จาก Apps Script ก่อน
-                console.error('Apps Script Error:', data.error, data.details);
+            if (data.success === false || data.error) { // ตรวจสอบ error จาก Apps Script ที่ success:false
+                console.error('Apps Script Error (fetchData):', data.error, data.details);
                 throw new Error(data.details || data.error || 'Unknown error from Google Sheet (server-side).');
             }
-
-            // ตรวจสอบว่า data เป็น array จริงๆ ก่อน map
             if (!Array.isArray(data)) {
                 console.error('Invalid data format from server. Expected an array.', data);
                 throw new Error('ได้รับข้อมูลในรูปแบบที่ไม่ถูกต้องจากเซิร์ฟเวอร์');
             }
-
             students = data.map(s => ({
-                ...s,
-                id: s.id ? s.id.toString() : Date.now().toString() + Math.random().toString(36).substr(2, 9), // ถ้า id เป็น null ให้สร้าง id ชั่วคราว (ควรไม่เกิดขึ้นถ้า GAS ทำงานถูก)
+                id: s.id ? s.id.toString() : `client_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
                 name: s.name || "",
                 class: s.class || "",
                 points: parseInt(s.points) || 0
             }));
-
             renderStudentList();
             renderDashboard();
         } catch (error) {
             console.error('Error fetching data from Google Sheet:', error);
             alert('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message);
-            studentListTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">ไม่สามารถโหลดข้อมูลได้</td></tr>';
+            studentListTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">ไม่สามารถโหลดข้อมูลได้: ${error.message}</td></tr>`;
         } finally {
             hideLoading();
         }
@@ -192,11 +123,8 @@
         try {
             const response = await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
-                // mode: 'cors', // fetch API จะจัดการ CORS โดยอัตโนมัติเมื่อ cross-origin ไม่จำเป็นต้องใส่ mode: 'cors' อย่างชัดเจน เว้นแต่ต้องการ no-cors หรือ same-origin
                 cache: 'no-cache',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json', },
                 body: JSON.stringify(payload),
                 redirect: "follow"
             });
@@ -207,26 +135,23 @@
                 result = JSON.parse(textResponse);
             } catch (e) {
                 console.error("Failed to parse JSON response from Apps Script:", textResponse, e);
-                // หาก textResponse ไม่ใช่ JSON และ response.ok เป็น false แสดงว่าอาจมี HTML error page จาก Google
                 if (!response.ok) {
-                     throw new Error(`Server responded with status ${response.status}: ${response.statusText}. Response body: ${textResponse.substring(0,500)}...`);
+                     throw new Error(`Server responded with status ${response.status}: ${response.statusText}. Response body (first 500 chars): ${textResponse.substring(0,500)}`);
                 }
-                throw new Error("Response from server was not valid JSON. Body: " + textResponse.substring(0,500) + "...");
+                throw new Error(`Response from server was not valid JSON. Body (first 500 chars): ${textResponse.substring(0,500)}`);
             }
 
-            if (!result || result.success === false) {
+            if (!result || result.success === false) { // ตรวจสอบ result.success ที่มาจาก Apps Script
                 console.error('Operation failed on server:', result);
-                throw new Error(result.message || result.error || 'Unknown error from Google Sheet API.');
+                throw new Error(result.message || result.error || 'Unknown error from Google Sheet API during POST.');
             }
-
             console.log('Operation successful:', result);
-            await fetchDataFromGoogleSheet(); // โหลดข้อมูลใหม่หลังการดำเนินการสำเร็จ
+            await fetchDataFromGoogleSheet();
             return result;
-
         } catch (error) {
             console.error('Error sending data to Google Sheet:', error);
             alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + error.message);
-            return { success: false, error: error.message };
+            return { success: false, error: error.message }; // คืน object ที่มี success: false
         } finally {
             hideLoading();
         }
@@ -234,26 +159,21 @@
 
     function renderStudentList() {
         studentListTableBody.innerHTML = '';
-        if (students.length === 0 && loadingIndicator.classList.contains('hidden')) { // แสดงเมื่อโหลดเสร็จและไม่มีข้อมูล
+        if (students.length === 0) {
             studentListTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">ยังไม่มีข้อมูลนักเรียน</td></tr>';
             return;
-        } else if (students.length === 0 && !loadingIndicator.classList.contains('hidden')) {
-            // กำลังโหลด ไม่ต้องทำอะไร รอให้ fetchDataFromGoogleSheet จัดการ
-            return;
         }
-
         students.forEach(student => {
             const row = studentListTableBody.insertRow();
-            // ตรวจสอบค่า null/undefined ก่อนแสดงผล เพื่อความปลอดภัย
             row.innerHTML = `
                 <td>${student.id || 'N/A'}</td>
                 <td>${student.name || 'ไม่มีชื่อ'}</td>
                 <td>${student.class || 'ไม่มีชั้นเรียน'}</td>
                 <td>${student.points || 0}</td>
                 <td class="actions">
-                    <button class="btn-add-point" onclick="addPointToStudent('${student.id}')">ให้คะแนน (+1)</button>
-                    <button class="btn-edit" onclick="editStudentHandler('${student.id}')">แก้ไข</button>
-                    <button class="btn-delete" onclick="deleteStudent('${student.id}')">ลบ</button>
+                    <button class="btn-add-point" onclick="addPointToStudent('${student.id}')" ${!student.id || student.id.startsWith('client_') ? 'disabled title="ID ไม่ถูกต้อง"' : ''}>ให้คะแนน (+1)</button>
+                    <button class="btn-edit" onclick="editStudentHandler('${student.id}')" ${!student.id || student.id.startsWith('client_') ? 'disabled title="ID ไม่ถูกต้อง"' : ''}>แก้ไข</button>
+                    <button class="btn-delete" onclick="deleteStudent('${student.id}')" ${!student.id || student.id.startsWith('client_') ? 'disabled title="ID ไม่ถูกต้อง"' : ''}>ลบ</button>
                 </td>
             `;
         });
@@ -288,39 +208,26 @@
         event.preventDefault();
         const name = studentNameInput.value.trim();
         const studentClass = studentClassInput.value.trim();
-
         if (name === '' || studentClass === '') {
             alert('กรุณากรอกข้อมูลให้ครบถ้วน');
             return;
         }
-
         let payload;
         if (editingStudentId) {
-            payload = {
-                action: 'UPDATE_STUDENT',
-                id: editingStudentId.toString(), // Ensure ID is string
-                name: name,
-                class: studentClass
-            };
+            payload = { action: 'UPDATE_STUDENT', id: editingStudentId.toString(), name: name, class: studentClass };
         } else {
-            payload = {
-                action: 'CREATE',
-                id: Date.now().toString() + Math.random().toString(36).substr(2, 5), // Client-side generated ID
-                name: name,
-                class: studentClass
-            };
+            // ID จะถูกสร้างใน Apps Script ถ้าไม่ได้ส่งไป หรือส่งเป็น null/undefined
+            // การส่ง ID ที่ client สร้างเองก็ทำได้เช่นกัน
+            payload = { action: 'CREATE', name: name, class: studentClass };
         }
-        
         const result = await sendDataToGoogleSheet(payload);
-        if (result && result.success) { // ตรวจสอบ result ก่อนเข้าถึง success
-            resetForm();
-        }
+        if (result && result.success) { resetForm(); }
     });
-    
+
     window.editStudentHandler = function(id) {
         const studentIdStr = id.toString();
         const student = students.find(s => s.id && s.id.toString() === studentIdStr);
-        if (student) {
+        if (student && !student.id.startsWith('client_')) { // ตรวจสอบว่าเป็น ID ที่ถูกต้อง
             studentIdInput.value = student.id;
             studentNameInput.value = student.name || "";
             studentClassInput.value = student.class || "";
@@ -329,32 +236,21 @@
             studentForm.scrollIntoView({ behavior: 'smooth' });
             switchToStudentManagementView();
         } else {
-            console.warn(`Student with ID ${id} not found for editing.`);
+            alert(`ไม่พบนักเรียน ID: ${id} หรือ ID ไม่ถูกต้องสำหรับแก้ไข`);
+            console.warn(`Student with ID ${id} not found or invalid for editing.`);
         }
     }
 
     window.addPointToStudent = async function(id) {
-        if (!id) {
-            alert("ไม่พบ ID นักเรียนสำหรับให้คะแนน");
-            return;
-        }
-        const payload = {
-            action: 'ADD_POINT',
-            id: id.toString()
-        };
+        if (!id || id.startsWith('client_')) { alert("ไม่พบ ID นักเรียนที่ถูกต้องสำหรับให้คะแนน"); return; }
+        const payload = { action: 'ADD_POINT', id: id.toString() };
         await sendDataToGoogleSheet(payload);
     }
 
     window.deleteStudent = async function(id) {
-        if (!id) {
-            alert("ไม่พบ ID นักเรียนสำหรับลบ");
-            return;
-        }
-        if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนักเรียนคนนี้?')) {
-            const payload = {
-                action: 'DELETE',
-                id: id.toString()
-            };
+        if (!id || id.startsWith('client_')) { alert("ไม่พบ ID นักเรียนที่ถูกต้องสำหรับลบ"); return; }
+        if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนักเรียน ID: ${id}?`)) {
+            const payload = { action: 'DELETE', id: id.toString() };
             const result = await sendDataToGoogleSheet(payload);
             if (result && result.success && editingStudentId && editingStudentId.toString() === id.toString()) {
                 resetForm();
@@ -368,7 +264,6 @@
         navStudentMgmtBtn.classList.add('active');
         navDashboardBtn.classList.remove('active');
     }
-
     function switchToDashboardView() {
         studentManagementSection.classList.add('hidden');
         dashboardSection.classList.remove('hidden');
@@ -384,8 +279,6 @@
         fetchDataFromGoogleSheet();
         switchToStudentManagementView();
     });
-
 </script>
-
 </body>
 </html>
